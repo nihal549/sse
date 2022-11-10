@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Server Sent Events</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<body>
+<div class="container mt-5">
+
+    <form>
+        <div class="form-row">
+            <div class="col">
+                <input id="max-price" type="text" class="form-control" placeholder="max price">
+            </div>
+            <div class="col">
+                <button id="notify" type="button" class="btn btn-secondary form-control font-weight-bold">Notify me!!</button>
+            </div>
+        </div>
+    </form>
+
+    <table class="table mt-5">
+        <thead class="thead-dark">
+        <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Description</th>
+            <th scope="col">Price</th>
+        </tr>
+        </thead>
+        <tbody id="table-body">
+
+        </tbody>
+    </table>
+</div>
+<script>
+    // const price = document.getElementById('max-price')
+    // const tBody = document.getElementById('table-body')
+    // const notify = document.getElementById('notify')
+    //
+    // notify.addEventListener('click',async ()=>{
+    //     console.log("clicked..")
+    //     const priceValue = price.value
+    //     console.log(priceValue)
+    //     await fetch(`http://localhost:63342/product/stream/${priceValue}`,{
+    //         method:"GET",
+    //         mode: 'no-cors',
+    //         headers: {
+    //             "Content-Type": "application/json",
+    //             "Access-Control-Allow-Origin":'*',
+    //             'Access-Control-Allow-Headers':'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+    //         }
+    //     })
+    //         .then(res=>{
+    //            const data=res.json()
+    //             console.log(res.body)
+    //             console.log(data)
+    //
+    //         })
+    //         // .then(evt=>{
+    //         //      console.log(evt)
+    //         //     let product = JSON.parse(evt.data);
+    //         //     let row = `
+    //         //     <th scope="row">${product.id}</th>
+    //         //     <td>${product.description}</td>
+    //         //     <td>${product.price}</td>
+    //         // `;
+    //         //     let tr = document.createElement('tr');
+    //         //     tr.innerHTML = row;
+    //         //     tBody.appendChild(tr);
+    //         //})
+    // })
+
+    const observeProducts = () => {
+
+        const price = document.getElementById('max-price').value;
+        const tBody = document.getElementById('table-body');
+
+        let source = new EventSource("/product/stream/" + price);
+        source.onmessage = (evt) => {
+            let product = JSON.parse(evt.data);
+            let row = `
+                <th scope="row">${product.id}</th>
+                <td>${product.description}</td>
+                <td>${product.price}</td>
+            `;
+            let tr = document.createElement('tr');
+            tr.innerHTML = row;
+            tBody.appendChild(tr);
+        };
+
+    }
+    document.getElementById('notify').addEventListener('click', observeProducts);
+</script>
+
+</body>
+</html>
